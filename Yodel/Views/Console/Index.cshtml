@@ -1,0 +1,65 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Yodel Console</title>
+    <!-- load MUI -->
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Source+Code+Pro">
+    <link href="~/css/mui.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/css/custom.css" rel="stylesheet" type="text/css" />
+    <link href="~/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <style>
+         body {
+             font-family: 'Source Code Pro', monospace;
+         }
+
+         html, body {
+             height: 100%;
+
+             display: flex;
+             flex-direction: column;
+         }
+
+         body > * {
+             flex-shrink: 0;
+         }
+    </style>
+    <script src="~/js/mui.min.js">
+    </script>
+</head>
+<body>
+<header id="header">
+    <div id="appbar" class="mui--z2 mui-appbar mui--appbar-line-height" style="position: fixed; top: 0; width: 100%; background-color: #444;">
+        <div class="mui-container-fluid">
+            <table width="100%">
+                <tr style="vertical-align: middle;">
+                    <td class="mui--text-light mui--text-title mui--appbar-height">Yodel Console</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</header>
+<div id="content-wrapper" style="margin-top: 0; background-color: #222; flex-grow: 1;">
+    <div class="mui-container-fluid">
+            <div class="mui--text-light" id="consoleText"></div>
+    </div>
+</div>
+<script>
+    const CONSOLE = "console";
+
+    const { ipcRenderer } = require("electron");
+
+    var consoleText = document.getElementById("consoleText");
+    var appbar = document.getElementById("appbar");
+    var contentWrapper = document.getElementById("content-wrapper");
+
+    ipcRenderer.on(CONSOLE,
+        (event, args) => {
+            consoleText.innerText = args;
+            window.scrollTo(0, document.body.scrollHeight);
+            contentWrapper.style.marginTop = appbar.clientHeight + "px";
+        });
+</script>
+</body>
+</html>

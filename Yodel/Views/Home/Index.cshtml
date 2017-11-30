@@ -1,0 +1,1135 @@
+﻿@using NYoutubeDL.Helpers
+@using Yodel.Helpers
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width"/>
+    <title>Yodel - a youtube-dl UI</title>
+    <!-- load MUI -->
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Roboto|Open+Sans">
+    <link href="~/css/mui.min.css" rel="stylesheet" type="text/css"/>
+    <link href="~/css/custom.css" rel="stylesheet" type="text/css"/>
+    <link href="~/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+    <style>
+        header { font-family: 'Roboto', sans-serif; }
+        body { font-family: 'Open Sans', sans-serif;}
+    </style>
+    <script src="~/js/mui.min.js">
+    </script>
+</head>
+<body>
+<header id="header">
+    <div class="mui--z2 mui-appbar mui--appbar-line-height">
+        <div class="mui-container-fluid">
+            <table width="100%">
+                <tr style="vertical-align: middle;">
+                    <td class="mui--text-title mui--appbar-height">Yodel</td>
+                    <td class="mui--appbar-height" align="right">
+                        <button class="mui-btn mui-btn--raised mui-btn--primary mui-btn--dark" id="console-btn" onclick="openConsole();">
+                            <i class="fa fa-terminal" aria-hidden="true"></i>
+                        </button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</header>
+<div id="content-wrapper">
+<div class="mui-container-fluid">
+<ul class="mui-tabs__bar mui-tabs__bar--justified">
+    <li class="mui--is-active">
+        <a data-mui-toggle="tab" data-mui-controls="pane-justified-main">Main</a>
+    </li>
+    <li>
+        <a data-mui-toggle="tab" data-mui-controls="pane-justified-options">Options</a>
+    </li>
+    <li>
+        <a data-mui-toggle="tab" data-mui-controls="pane-justified-update">Update</a>
+    </li>
+</ul>
+<div class="mui-tabs__pane mui--is-active" id="pane-justified-main">
+    <div class="mui-panel">
+        <form class="mui-form" onsubmit="download();return false;">
+            <div class="mui-textfield mui-textfield--float-label">
+                <textarea id="url-textarea" required></textarea>
+                <label>URLs</label>
+            </div>
+            <div class="mui-textfield mui-textfield--float-label">
+                <input id="output" type="text" value="@YoutubeHelper.Instance.YoutubeDl.Options.FilesystemOptions.Output" required onclick="selectDirectory(this.id, SET_FILESYSTEM_OPTION);">
+                <label>Download path</label>
+            </div>
+            <div style="text-align: center">
+                <button class="mui-btn mui-btn--raised mui-btn--primary mui-btn--dark" id="download-btn" onclick="" type="submit">Download</button>
+            </div>
+            <div class="mui-checkbox">
+                <label>
+                    <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.RetrieveAllInfo" id="RetrieveAllInfo" onchange="setYdlProperty(this.id, this.checked);"/>
+                    Retrieve full info of all videos. This enabled thumbnails for playlists.
+                    NOTE: this will be excruciatingly slow for large playlists / many videos!
+                </label>
+            </div>
+        </form>
+    </div>
+    <div class="mui-panel">
+        <table id="downloads-table" class="mui-table mui-table--bordered">
+            <thead>
+            <tr>
+                <th>Thumbnail</th>
+                <th>Title</th>
+                <th>Size</th>
+                <th>Progress</th>
+                <th>ETA</th>
+                <th>Speed</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+<div class="mui-tabs__pane" id="pane-justified-options">
+<div class="mui-panel">
+<ul class="mui-tabs__bar">
+    <li class="mui--is-active">
+        <a data-mui-toggle="tab" data-mui-controls="pane-general">General</a>
+    </li>
+    <li>
+        <a data-mui-toggle="tab" data-mui-controls="pane-download">Download</a>
+    </li>
+    <li>
+        <a data-mui-toggle="tab" data-mui-controls="pane-post-processing">Post-processing</a>
+    </li>
+    <li>
+        <a data-mui-toggle="tab" data-mui-controls="pane-authentication">Authentication</a>
+    </li>
+    <li>
+        <a data-mui-toggle="tab" data-mui-controls="pane-video-format">Video Format</a>
+    </li>
+    <li>
+        <a data-mui-toggle="tab" data-mui-controls="pane-network">Network</a>
+    </li>
+    <li>
+        <a data-mui-toggle="tab" data-mui-controls="pane-video-selection">Video Selection</a>
+    </li>
+    <li>
+        <a data-mui-toggle="tab" data-mui-controls="pane-filesystem">Filesystem</a>
+    </li>
+    <li>
+        <a data-mui-toggle="tab" data-mui-controls="pane-thumbnail">Thumbnail images</a>
+    </li>
+    <li>
+        <a data-mui-toggle="tab" data-mui-controls="pane-verbosity-simulation">Verbosity / Simulation</a>
+    </li>
+    <li>
+        <a data-mui-toggle="tab" data-mui-controls="pane-subtitle">Subtitle</a>
+    </li>
+    <li>
+        <a data-mui-toggle="tab" data-mui-controls="pane-adobe-pass">Adobe Pass</a>
+    </li>
+    <li>
+        <a data-mui-toggle="tab" data-mui-controls="pane-workaround">Workarounds</a>
+    </li>
+</ul>
+<div class="mui-tabs__pane mui--is-active" id="pane-general">
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.GeneralOptions.IgnoreErrors" id="ignoreErrors" onchange="setGeneralOption(this.id, this.checked);"/>
+            Ignore errors
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.GeneralOptions.AbortOnError" id="abortOnError" onchange="setGeneralOption(this.id, this.checked);"/>
+            Abort on error
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.GeneralOptions.DumpUserAgent" id="dumpUserAgent" onchange="setGeneralOption(this.id, this.checked);"/>
+            Dump user agent
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.GeneralOptions.ListExtractors" id="listExtractors" onchange="setGeneralOption(this.id, this.checked);"/>
+            List extractors
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.GeneralOptions.ExtractorDescriptions" id="extractorDescriptions" onchange="setGeneralOption(this.id, this.checked);"/>
+            Extractor descriptions
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.GeneralOptions.ForceGenericExtractor" id="forceGenericExtractor" onchange="setGeneralOption(this.id, this.checked);"/>
+            Force generic extractor
+        </label>
+    </div>
+    <div class="mui-textfield mui-textfield--float-label">
+        <input type="text" id="defaultSearch" value="@YoutubeHelper.Instance.YoutubeDl.Options.GeneralOptions.DefaultSearch" oninput="setGeneralOption(this.id, this.value);">
+        <label>Default search</label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.GeneralOptions.IgnoreConfig" id="ignoreConfig" onchange="setGeneralOption(this.id, this.checked);"/>
+            Ignore configuration file
+        </label>
+    </div>
+    <div class="mui-textfield">
+        <input type="file" id="configLocation" value="@YoutubeHelper.Instance.YoutubeDl.Options.GeneralOptions.ConfigLocation" oninput="setGeneralOption(this.id, this.value);">
+        <label>Configuration file location</label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.GeneralOptions.FlatPlaylist" id="flatPlaylist" onchange="setGeneralOption(this.id, this.checked);"/>
+            Flat playlist
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.GeneralOptions.MarkWatched" id="markWatched" onchange="setGeneralOption(this.id, this.checked);"/>
+            Mark videos as watched
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.GeneralOptions.NoMarkWatched" id="noMarkWatched" onchange="setGeneralOption(this.id, this.checked);"/>
+            Don't mark videos as watched
+        </label>
+    </div>
+</div>
+<div class="mui-tabs__pane" id="pane-network">
+    <div class="mui-textfield mui-textfield--float-label">
+        <input type="url" id="proxy" value="@YoutubeHelper.Instance.YoutubeDl.Options.NetworkOptions.Proxy" oninput="setNetworkOption(this.id, this.value);">
+        <label>HTTP/HTTPS/SOCKS proxy</label>
+    </div>
+    <div class="mui-textfield mui-textfield--float-label">
+        <input type="number" id="socketTimeout" value="@YoutubeHelper.Instance.YoutubeDl.Options.NetworkOptions.SocketTimeout" oninput="setNetworkOption(this.id, parseInt(this.value));">
+        <label>Time to wait before giving up, in seconds</label>
+    </div>
+    <div class="mui-textfield mui-textfield--float-label">
+        <input type="url" id="sourceAddress" value="@YoutubeHelper.Instance.YoutubeDl.Options.NetworkOptions.SourceAddress" oninput="setNetworkOption(this.id, this.value);">
+        <label>Client-side IP address to bind to</label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.NetworkOptions.ForceIpv4" id="forceIpv4" onchange="setNetworkOption(this.id, this.checked);"/>
+            Make all connections via IPv4
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.NetworkOptions.ForceIpv6" id="forceIpv6" onchange="setNetworkOption(this.id, this.checked);"/>
+            Make all connection via IPv6
+        </label>
+    </div>
+</div>
+<div class="mui-tabs__pane" id="pane-video-selection">
+    <div class="mui-textfield mui-textfield--float-label">
+        <input type="number" id="playlistStart" value="@YoutubeHelper.Instance.YoutubeDl.Options.VideoSelectionOptions.PlaylistStart" oninput="setVideoSelectionOption(this.id, parseInt(this.value));">
+        <label>Playlist video to start at</label>
+    </div>
+    <div class="mui-textfield mui-textfield--float-label">
+        <input type="number" id="playlistEnd" value="@YoutubeHelper.Instance.YoutubeDl.Options.VideoSelectionOptions.PlaylistEnd" oninput="setVideoSelectionOption(this.id, parseInt(this.value));">
+        <label>Playlist video to end at (negative is disabled)</label>
+    </div>
+    <div class="mui-textfield mui-textfield--float-label">
+        <input type="text" id="playlistItems" value="@YoutubeHelper.Instance.YoutubeDl.Options.VideoSelectionOptions.PlaylistItems" oninput="setVideoSelectionOption(this.id, this.value);">
+        <label>Playlist video items to download</label>
+    </div>
+    <div class="mui-textfield mui-textfield--float-label">
+        <input type="text" id="matchTitle" value="@YoutubeHelper.Instance.YoutubeDl.Options.VideoSelectionOptions.MatchTitle" oninput="setVideoSelectionOption(this.id, this.value);">
+        <label>Download only matching titles</label>
+    </div>
+    <div class="mui-textfield mui-textfield--float-label">
+        <input type="text" id="rejectTitle" value="@YoutubeHelper.Instance.YoutubeDl.Options.VideoSelectionOptions.RejectTitle" oninput="setVideoSelectionOption(this.id, this.value);">
+        <label>Skip download for matching titles</label>
+    </div>
+    <div class="mui-textfield mui-textfield--float-label">
+        <input type="number" id="maxDownloads" value="@YoutubeHelper.Instance.YoutubeDl.Options.VideoSelectionOptions.MaxDownloads" oninput="setVideoSelectionOption(this.id, parseInt(this.value));">
+        <label>Abort after downloading this number of files (negative is disabled)</label>
+    </div>
+    <div class="mui-textfield mui-textfield--float-label">
+        <input type="text" id="minFileSize" value="@YoutubeHelper.Instance.YoutubeDl.Options.VideoSelectionOptions.MinFileSize" oninput="setVideoSelectionOption(this.id, this.value);">
+        <label>Do not download videos smaller than this</label>
+    </div>
+    <div class="mui-textfield mui-textfield--float-label">
+        <input type="text" id="maxFileSize" value="@YoutubeHelper.Instance.YoutubeDl.Options.VideoSelectionOptions.MaxFileSize" oninput="setVideoSelectionOption(this.id, this.value);">
+        <label>Do not download videos larger than this</label>
+    </div>
+    <div class="mui-textfield mui-textfield--float-label">
+        <input type="number" id="minViews" value="@YoutubeHelper.Instance.YoutubeDl.Options.VideoSelectionOptions.MinViews" oninput="setVideoSelectionOption(this.id, parseInt(this.value));">
+        <label>Do not download any videos with less than this number of views</label>
+    </div>
+    <div class="mui-textfield mui-textfield--float-label">
+        <input type="number" id="maxViews" value="@YoutubeHelper.Instance.YoutubeDl.Options.VideoSelectionOptions.MaxViews" oninput="setVideoSelectionOption(this.id, parseInt(this.value));">
+        <label>Do not download any videos with less than this number of views</label>
+    </div>
+    <div class="mui-textfield mui-textfield--float-label">
+        <input type="text" id="matchFilter" value="@YoutubeHelper.Instance.YoutubeDl.Options.VideoSelectionOptions.MatchFilter" oninput="setVideoSelectionOption(this.id, this.value);">
+        <label>Generic video filter (see official documentation for more information)</label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.VideoSelectionOptions.NoPlaylist" id="noPlaylist" onchange="setVideoSelectionOption(this.id, this.checked);"/>
+            Download only the video, if the URL refers to a video and a playlist
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.VideoSelectionOptions.YesPlaylist" id="yesPlaylist" onchange="setVideoSelectionOption(this.id, this.checked);"/>
+            Download the playlist, if the URL refers to a video and a playlist"
+        </label>
+    </div>
+    <div class="mui-textfield mui-textfield--float-label">
+        <input type="number" id="ageLimit" value="@YoutubeHelper.Instance.YoutubeDl.Options.VideoSelectionOptions.AgeLimit" oninput="setVideoSelectionOption(this.id, parseInt(this.value));">
+        <label>Download only videos suitable for the given age</label>
+    </div>
+    <div class="mui-textfield">
+        <input type="file" id="downloadArchive" value="@YoutubeHelper.Instance.YoutubeDl.Options.VideoSelectionOptions.DownloadArchive" oninput="setVideoSelectionOption(this.id, this.value);">
+        <label>Download only videos not listed in the archive file</label>
+    </div>
+</div>
+<div class="mui-tabs__pane" id="pane-download">
+    <div class="mui-textfield mui-textfield--float-label">
+        <input type="text" id="limitRate" value="@YoutubeHelper.Instance.YoutubeDl.Options.DownloadOptions.LimitRate" oninput="setDownloadOption(this.id, this.value);">
+        <label>Limit download speed to</label>
+    </div>
+    <div class="mui-textfield mui-textfield--float-label">
+        <input type="number" id="retries" value="@YoutubeHelper.Instance.YoutubeDl.Options.DownloadOptions.Retries" oninput="setDownloadOption(this.id, parseInt(this.value));">
+        <label>Number of retries (negative is infinite)</label>
+    </div>
+    <div class="mui-textfield mui-textfield--float-label">
+        <input type="number" id="fragmentRetries" value="@YoutubeHelper.Instance.YoutubeDl.Options.DownloadOptions.FragmentRetries" oninput="setDownloadOption(this.id, parseInt(this.value));">
+        <label>Number of retries per fragment (negative is infinite)</label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.DownloadOptions.SkipUnavailableFragments" id="skipUnavailableFragments" onchange="setDownloadOption(this.id, this.checked);"/>
+            Skip unavailable fragments
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.DownloadOptions.AbortOnUnavailableFragment" id="abortOnUnavailableFragment" onchange="setDownloadOption(this.id, this.checked);"/>
+            Abort on unavailable fragments
+        </label>
+    </div>
+    <div class="mui-textfield mui-textfield--float-label">
+        <input type="text" id="bufferSize" value="@YoutubeHelper.Instance.YoutubeDl.Options.DownloadOptions.BufferSize" oninput="setDownloadOption(this.id, this.value);">
+        <label>Download buffer size</label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.DownloadOptions.NoResizeBuffer" id="noResizeBuffer" onchange="setDownloadOption(this.id, this.checked);"/>
+            Don't auto-resize the buffer
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.DownloadOptions.PlaylistReverse" id="playlistReverse" onchange="setDownloadOption(this.id, this.checked);"/>
+            Download playlist in reverse order
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.DownloadOptions.PlaylistRandom" id="playlistRandom" onchange="setDownloadOption(this.id, this.checked);"/>
+            Download playlist in random order
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.DownloadOptions.HlsPreferNative" id="hlsPreferNative" onchange="setDownloadOption(this.id, this.checked);"/>
+            Use native HLS downloader
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.DownloadOptions.HlsPreferFfmpeg" id="hlsPreferFfmpeg" onchange="setDownloadOption(this.id, this.checked);"/>
+            Use FFMPEG downloader
+        </label>
+    </div>
+    <div class="mui-select">
+        <select id="externalDownloader" value="@YoutubeHelper.Instance.YoutubeDl.Options.DownloadOptions.ExternalDownloader" onchange="setDownloadOption(this.id, parseInt(this.value));">
+            @foreach (int downloader in Enum.GetValues(typeof(Enums.ExternalDownloader)))
+            {
+                <option value="@downloader">@Enum.GetName(typeof(Enums.ExternalDownloader), downloader)</option>
+            }
+        </select>
+        <label>External Downloader</label>
+    </div>
+    <div class="mui-textfield mui-textfield--float-label">
+        <input type="text" id="externalDownloaderArgs" value="@YoutubeHelper.Instance.YoutubeDl.Options.DownloadOptions.ExternalDownloaderArgs" oninput="setDownloadOption(this.id, this.value);">
+        <label>External downloader arguments</label>
+    </div>
+</div>
+<div class="mui-tabs__pane" id="pane-filesystem">
+    <div class="mui-textfield">
+        <input type="file" id="batchFile" value="@YoutubeHelper.Instance.YoutubeDl.Options.FilesystemOptions.BatchFile" oninput="setFilesystemOption(this.id, this.value);">
+        <label>File containing URLs to download</label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.FilesystemOptions.Id" id="id" onchange="setFilesystemOption(this.id, this.checked);"/>
+            Use only video ID in file name
+        </label>
+    </div>
+    <div class="mui-textfield mui-textfield--float-label">
+        <input type="number" id="autoNumberStart" value="@YoutubeHelper.Instance.YoutubeDl.Options.FilesystemOptions.AutoNumberStart" oninput="setFilesystemOption(this.id, this.value);">
+        <label>Specify the start value for %(autonumber)s</label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.FilesystemOptions.RestrictFilenames" id="restrictFilenames" onchange="setFilesystemOption(this.id, this.checked);"/>
+            Restrict filenames to only ASCII characters (also avoids &amp; and spaces)
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.FilesystemOptions.NoOverwrites" id="noOverwrites" onchange="setFilesystemOption(this.id, this.checked);"/>
+            Do not overwrite files
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.FilesystemOptions.Continue" id="continue" onchange="setFilesystemOption(this.id, this.checked);"/>
+            Force resume of partially downloaded files. By default, youtube-dl will resume downloads if possible.
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.FilesystemOptions.NoContinue" id="noContinue" onchange="setFilesystemOption(this.id, this.checked);"/>
+            Do not resume partially downloaded files (restart from beginning)
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.FilesystemOptions.NoPart" id="noPart" onchange="setFilesystemOption(this.id, this.checked);"/>
+            Do not use .part files - write directly into output file
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.FilesystemOptions.NoMtime" id="noMtime" onchange="setFilesystemOption(this.id, this.checked);"/>
+            Do not use the Last-modified header to set the file modification time
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.FilesystemOptions.WriteDescription" id="writeDescription" onchange="setFilesystemOption(this.id, this.checked);"/>
+            Write video description to a .description file
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.FilesystemOptions.WriteInfoJson" id="writeInfoJson" onchange="setFilesystemOption(this.id, this.checked);"/>
+            Write video metadata to a .info.json file
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.FilesystemOptions.WriteAnnotations" id="writeAnnotations" onchange="setFilesystemOption(this.id, this.checked);"/>
+            Write video annotations to a .annotations.xml file
+        </label>
+    </div>
+    <div class="mui-textfield">
+        <input type="file" id="cookies" value="@YoutubeHelper.Instance.YoutubeDl.Options.FilesystemOptions.Cookies" oninput="setFilesystemOption(this.id, this.value);">
+        <label>File to read cookies from and dump cookie jar in</label>
+    </div>
+    <div class="mui-textfield">
+        <input type="text" id="cacheDir" value="@YoutubeHelper.Instance.YoutubeDl.Options.FilesystemOptions.CacheDir" onclick="selectDirectory(this.id, SET_FILESYSTEM_OPTION);">
+        <label>Location in the filesystem where youtube-dl can store some downloaded information permanently.</label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.FilesystemOptions.NoCacheDir" id="noCacheDir" onchange="setFilesystemOption(this.id, this.checked);"/>
+            Disable filesystem caching
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.FilesystemOptions.RmCacheDir" id="rmCacheDir" onchange="setFilesystemOption(this.id, this.checked);"/>
+            Delete all filesystem cache files
+        </label>
+    </div>
+</div>
+<div class="mui-tabs__pane" id="pane-thumbnail">
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.ThumbnailImagesOptions.WriteThumbnail" id="writeThumbnail" onchange="setFilesystemOption(this.id, this.checked);"/>
+            Write thumbnail image to disk
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.ThumbnailImagesOptions.WriteAllThumbnails" id="writeAllThumbnails" onchange="setFilesystemOption(this.id, this.checked);"/>
+            Write all thumbnail image formats to disk
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.ThumbnailImagesOptions.ListThumbnails" id="listThumbnails" onchange="setFilesystemOption(this.id, this.checked);"/>
+            Simulate and list all available thumbnail formats
+        </label>
+    </div>
+</div>
+<div class="mui-tabs__pane" id="pane-verbosity-simulation">
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.VerbositySimulationOptions.Quiet" id="quiet" onchange="setVerbositySimulationOption(this.id, this.checked);"/>
+            Activate quiet mode
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.VerbositySimulationOptions.NoWarnings" id="noWarnings" onchange="setVerbositySimulationOption(this.id, this.checked);"/>
+            Ignore warnings
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.VerbositySimulationOptions.Simulate" id="simulate" onchange="setVerbositySimulationOption(this.id, this.checked);"/>
+            Do not download the video and do not write anything to disk
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.VerbositySimulationOptions.SkipDownload" id="skipDownload" onchange="setVerbositySimulationOption(this.id, this.checked);"/>
+            Activate quiet mode
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.VerbositySimulationOptions.GetUrl" id="getUrl" onchange="setVerbositySimulationOption(this.id, this.checked);"/>
+            Simulate, quiet but print URL
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.VerbositySimulationOptions.GetTitle" id="getTitle" onchange="setVerbositySimulationOption(this.id, this.checked);"/>
+            Simulate, quiet but print title
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.VerbositySimulationOptions.GetId" id="getId" onchange="setVerbositySimulationOption(this.id, this.checked);"/>
+            Simulate, quiet but print id
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.VerbositySimulationOptions.GetThumbnail" id="getThumbnail" onchange="setVerbositySimulationOption(this.id, this.checked);"/>
+            Simulate, quiet but print thumbnail URL
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.VerbositySimulationOptions.GetDescription" id="getDescription" onchange="setVerbositySimulationOption(this.id, this.checked);"/>
+            Simulate, quiet but print video description
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.VerbositySimulationOptions.GetDuration" id="getDuration" onchange="setVerbositySimulationOption(this.id, this.checked);"/>
+            Simulate, quiet but print video length
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.VerbositySimulationOptions.GetFilename" id="getFilename" onchange="setVerbositySimulationOption(this.id, this.checked);"/>
+            Simulate, quiet but print output filename
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.VerbositySimulationOptions.GetFormat" id="getFormat" onchange="setVerbositySimulationOption(this.id, this.checked);"/>
+            Simulate, quiet but print output format
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.VerbositySimulationOptions.DumpJson" id="dumpJson" onchange="setVerbositySimulationOption(this.id, this.checked);"/>
+            Simulate, quiet but print JSON information
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.VerbositySimulationOptions.DumpSingleJson" id="dumpSingleJson" onchange="setVerbositySimulationOption(this.id, this.checked);"/>
+            Simulate, quiet but print JSON information for each command-line argument.
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.VerbositySimulationOptions.PrintJson" id="printJson" onchange="setVerbositySimulationOption(this.id, this.checked);"/>
+            Be quiet and print the video information as JSON (video is still being downloaded).
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.VerbositySimulationOptions.Verbose" id="verbose" onchange="setVerbositySimulationOption(this.id, this.checked);"/>
+            Activate quiet mode
+        </label>
+    </div>
+</div>
+<div class="mui-tabs__pane" id="pane-workaround">
+    <div class="mui-textfield">
+        <input type="text" id="encoding" value="@YoutubeHelper.Instance.YoutubeDl.Options.WorkaroundsOptions.Encoding" oninput="setWorkaroundOptions(this.id, this.value);">
+        <label>Encoding (experimental)</label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.WorkaroundsOptions.NoCheckCertificate" id="noCheckCertificate" onchange="setWorkaroundOptions(this.id, this.checked);"/>
+            Suppress HTTPS certificate validation
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.WorkaroundsOptions.PreferInsecure" id="preferInsecure" onchange="setWorkaroundOptions(this.id, this.checked);"/>
+            Use an unencrypted connection to retrieve information about the video.
+        </label>
+    </div>
+    <div class="mui-textfield">
+        <input type="text" id="userAgent" value="@YoutubeHelper.Instance.YoutubeDl.Options.WorkaroundsOptions.UserAgent" oninput="setWorkaroundOptions(this.id, this.value);">
+        <label>Custom user agent</label>
+    </div>
+    <div class="mui-textfield">
+        <input type="text" id="referer" value="@YoutubeHelper.Instance.YoutubeDl.Options.WorkaroundsOptions.Referer" oninput="setWorkaroundOptions(this.id, this.value);">
+        <label>Custom referer, use if the video access is restricted to one domain</label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.WorkaroundsOptions.BiDiWorkaround" id="biDiWorkaround" onchange="setWorkaroundOptions(this.id, this.checked);"/>
+            Work around terminals that lack bidirectional text support. Requires bidiv or fribidi executable in PATH
+        </label>
+    </div>
+    <div class="mui-textfield">
+        <input type="number" id="sleepInterval" value="@YoutubeHelper.Instance.YoutubeDl.Options.WorkaroundsOptions.SleepInterval" oninput="setWorkaroundOptions(this.id, this.value);">
+        <label>Sleep interval if used alone / Minimum sleep interval if used with maximum below</label>
+    </div>
+    <div class="mui-textfield">
+        <input type="number" id="maxSleepInterval" value="@YoutubeHelper.Instance.YoutubeDl.Options.WorkaroundsOptions.MaxSleepInterval" oninput="setWorkaroundOptions(this.id, this.value);">
+        <label>Maximum sleep interval, only use with minimum sleep above</label>
+    </div>
+</div>
+<div class="mui-tabs__pane" id="pane-video-format">
+    <div class="mui-select">
+        <select id="format" value="@YoutubeHelper.Instance.YoutubeDl.Options.VideoFormatOptions.Format" onchange="setVideoFormatOption(this.id, parseInt(this.value));">
+            @foreach (int format in Enum.GetValues(typeof(Enums.VideoFormat)))
+            {
+                <option value="@format">@Enum.GetName(typeof(Enums.VideoFormat), format)</option>
+            }
+        </select>
+        <label>Video format</label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.VideoFormatOptions.AllFormats" id="allFormats" onchange="setVideoFormatOption(this.id, this.checked);"/>
+            Download all available video formats
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.VideoFormatOptions.PreferFreeFormats" id="preferFreeFormats" onchange="setVideoFormatOption(this.id, this.checked);"/>
+            Prefer free video formats unless a specific one is requested
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.VideoFormatOptions.ListFormats" id="listFormats" onchange="setVideoFormatOption(this.id, this.checked);"/>
+            List all available formats of requested videos
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.VideoFormatOptions.YoutubeSkipDashManifest" id="youtubeSkipDashManifest" onchange="setVideoFormatOption(this.id, this.checked);"/>
+            Do not download the DASH manifests and related data on YouTube videos
+        </label>
+    </div>
+    <div class="mui-select">
+        <select id="mergeOutputFormat" value="@YoutubeHelper.Instance.YoutubeDl.Options.VideoFormatOptions.MergeOutputFormat" onchange="setVideoFormatOption(this.id, parseInt(this.value));">
+            @foreach (int format in Enum.GetValues(typeof(Enums.VideoFormat)))
+            {
+                <option value="@format">@Enum.GetName(typeof(Enums.VideoFormat), format)</option>
+            }
+        </select>
+        <label>Merge output format - ignored if no merge is required</label>
+    </div>
+</div>
+<div class="mui-tabs__pane" id="pane-subtitle">
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.SubtitleOptions.WriteSub" id="writeSub" onchange="setSubtitleOption(this.id, this.checked);"/>
+            Write subtitle file
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.SubtitleOptions.WriteAutoSub" id="writeAutoSub" onchange="setSubtitleOption(this.id, this.checked);"/>
+            Write automatically generated subtitle file
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.SubtitleOptions.AllSubs" id="allSubs" onchange="setSubtitleOption(this.id, this.checked);"/>
+            Download all the available subtitles of the video
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.SubtitleOptions.ListSubs" id="listSubs" onchange="setSubtitleOption(this.id, this.checked);"/>
+            List all available subtitles for the video
+        </label>
+    </div>
+    <div class="mui-select">
+        <select id="subFormat" value="@YoutubeHelper.Instance.YoutubeDl.Options.SubtitleOptions.SubFormat" onchange="setSubtitleOption(this.id, parseInt(this.value));">
+            @foreach (int format in Enum.GetValues(typeof(Enums.SubtitleFormat)))
+            {
+                <option value="@format">@Enum.GetName(typeof(Enums.SubtitleFormat), format)</option>
+            }
+        </select>
+        <label>Subtitle format</label>
+    </div>
+    <div class="mui-textfield">
+        <input type="text" id="subLang" value="@YoutubeHelper.Instance.YoutubeDl.Options.SubtitleOptions.SubLang" oninput="setSubtitleOption(this.id, this.value);">
+        <label>Languages of the subtitles to download (optional) separated by commas</label>
+    </div>
+</div>
+<div class="mui-tabs__pane" id="pane-authentication">
+    <div class="mui-textfield mui-textfield--float-label">
+        <input type="text" id="username" value="@YoutubeHelper.Instance.YoutubeDl.Options.AuthenticationOptions.Username" oninput="setAuthenticationOption(this.id, this.value);">
+        <label>Username</label>
+    </div>
+    <div class="mui-textfield mui-textfield--float-label">
+        <input type="password" id="password" value="@YoutubeHelper.Instance.YoutubeDl.Options.AuthenticationOptions.Password" oninput="setAuthenticationOption(this.id, this.value);">
+        <label>Password</label>
+    </div>
+    <div class="mui-textfield mui-textfield--float-label">
+        <input type="text" id="twoFactor" value="@YoutubeHelper.Instance.YoutubeDl.Options.AuthenticationOptions.TwoFactor" oninput="setAuthenticationOption(this.id, this.value);">
+        <label>Two factor code</label>
+    </div>
+    <div class="mui-textfield mui-textfield--float-label">
+        <input type="password" id="videoPassword" value="@YoutubeHelper.Instance.YoutubeDl.Options.AuthenticationOptions.VideoPassword" oninput="setAuthenticationOption(this.id, this.value);">
+        <label>Video Password</label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.AuthenticationOptions.NetRc" id="netRc" onchange="setAuthenticationOption(this.id, this.checked);"/>
+            Use .netrc authentication data
+        </label>
+    </div>
+</div>
+<div class="mui-tabs__pane" id="pane-adobe-pass">
+    <div class="mui-textfield">
+        <input type="text" id="mso" value="@YoutubeHelper.Instance.YoutubeDl.Options.AdobePassOptions.Mso" oninput="setAdobePassOption(this.id, this.value);">
+        <label>Adobe Pass multiple-system operator (TV provider) identifier</label>
+    </div>
+    <div class="mui-textfield">
+        <input type="text" id="username" value="@YoutubeHelper.Instance.YoutubeDl.Options.AdobePassOptions.Username" oninput="setAdobePassOption(this.id, this.value);">
+        <label>Multiple-system operator account login</label>
+    </div>
+    <div class="mui-textfield">
+        <input type="password" id="password" value="@YoutubeHelper.Instance.YoutubeDl.Options.AdobePassOptions.Password" oninput="setAdobePassOption(this.id, this.value);">
+        <label>Multiple-system operator account password</label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.AdobePassOptions.ListMso" id="listMso" onchange="setAdobePassOption(this.id, this.checked);"/>
+            List all supported multiple-system operators
+        </label>
+    </div>
+</div>
+<div class="mui-tabs__pane" id="pane-post-processing">
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.PostProcessingOptions.ExtractAudio" id="extractAudio" onchange="setPostProcessingOption(this.id, this.checked);"/>
+            Extract audio
+        </label>
+    </div>
+    <div class="mui-select">
+        <select id="audioFormat" value="@YoutubeHelper.Instance.YoutubeDl.Options.PostProcessingOptions.AudioFormat" onchange="setPostProcessingOption(this.id, parseInt(this.value));">
+            @foreach (int audioFormat in Enum.GetValues(typeof(Enums.AudioFormat)))
+            {
+                <option value="@audioFormat">@Enum.GetName(typeof(Enums.AudioFormat), audioFormat)</option>
+            }
+        </select>
+        <label>Audio format</label>
+    </div>
+    <div class="mui-textfield mui-textfield--float-label">
+        <input type="number" min="0" max="9" value="@YoutubeHelper.Instance.YoutubeDl.Options.PostProcessingOptions.AudioQuality" id="audioQuality" oninput="setPostProcessingOption(this.id, this.value);">
+        <label>Audio Quality (0 is best, 5 is default)</label>
+    </div>
+    <div class="mui-select">
+        <select id="recodeFormat" aria-valuemax="@YoutubeHelper.Instance.YoutubeDl.Options.PostProcessingOptions.RecodeFormat" onchange="setPostProcessingOption(this.id, parseInt(this.value));">
+            @foreach (int videoFormat in Enum.GetValues(typeof(Enums.VideoFormat)))
+            {
+                <option value="@videoFormat">@Enum.GetName(typeof(Enums.VideoFormat), videoFormat)</option>
+            }
+        </select>
+        <label>Recode video to</label>
+    </div>
+    <div class="mui-textfield mui-textfield--float-label">
+        <input type="text" id="postProcessorArgs" value="@YoutubeHelper.Instance.YoutubeDl.Options.PostProcessingOptions.PostProcessorArgs" oninput="setPostProcessingOption(this.id, this.value);">
+        <label>Post processor arguments</label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.PostProcessingOptions.KeepVideo" id="keepVideo" onchange="setPostProcessingOption(this.id, this.checked);"/>
+            Keep video
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.PostProcessingOptions.NoPostOverwrites" id="noPostOverwrites" onchange="setPostProcessingOption(this.id, this.checked);"/>
+            Don't overwrite existing post-processed files
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.PostProcessingOptions.EmbedSubs" id="embedSubs" onchange="setPostProcessingOption(this.id, this.checked);"/>
+            Embed subtitles
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.PostProcessingOptions.EmbedThumbnail" id="embedThumbnail" onchange="setPostProcessingOption(this.id, this.checked);"/>
+            Embed thumbnail as cover art
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.PostProcessingOptions.AddMetadata" id="addMetadata" onchange="setPostProcessingOption(this.id, this.checked);"/>
+            Write metadata to file
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.PostProcessingOptions.MetadataFromTitle" id="metadataFromTitle" onchange="setPostProcessingOption(this.id, this.checked);"/>
+            Parse metadata from title
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.PostProcessingOptions.Xattrs" id="xattrs" onchange="setPostProcessingOption(this.id, this.checked);"/>
+            Write metadata to file's xattrs
+        </label>
+    </div>
+    <div class="mui-select">
+        <select id="fixupPolicy" value="@YoutubeHelper.Instance.YoutubeDl.Options.PostProcessingOptions.FixupPolicy" onchange="setPostProcessingOption(this.id, parseInt(this.value));">
+            @foreach (int policy in Enum.GetValues(typeof(Enums.FixupPolicy)))
+            {
+                <option value="@policy">@Enum.GetName(typeof(Enums.FixupPolicy), policy)</option>
+            }
+        </select>
+        <label>Fault correction policy</label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.PostProcessingOptions.PreferAvconv" id="preferAvconv" onchange="setPostProcessingOption(this.id, this.checked);"/>
+            Prefer avconv for post processing
+        </label>
+    </div>
+    <div class="mui-checkbox">
+        <label>
+            <input type="checkbox" value="" checked="@YoutubeHelper.Instance.YoutubeDl.Options.PostProcessingOptions.PreferFfmpeg" id="preferFfmpeg" onchange="setPostProcessingOption(this.id, this.checked);"/>
+            Prefer ffmpeg for post processing
+        </label>
+    </div>
+    <div class="mui-textfield">
+        <input type="file" id="ffmpegLocation" value="@YoutubeHelper.Instance.YoutubeDl.Options.PostProcessingOptions.FfmpegLocation" oninput="setPostProcessingOption(this.id, this.value);">
+        <label>Location of ffmpeg/avconv binary</label>
+    </div>
+    <div class="mui-textfield mui-textfield--float-label">
+        <input type="text" id="command" value="@YoutubeHelper.Instance.YoutubeDl.Options.PostProcessingOptions.Command" oninput="setPostProcessingOption(this.id, this.value);">
+        <label>Execute the following command on each file after downloading</label>
+    </div>
+    <div class="mui-select">
+        <select id="convertSubs" value="@YoutubeHelper.Instance.YoutubeDl.Options.PostProcessingOptions.ConvertSubs" onchange="setPostProcessingOption(this.id, parseInt(this.value));">
+            @foreach (int subFormat in Enum.GetValues(typeof(Enums.SubtitleFormat)))
+            {
+                <option value="@subFormat">@Enum.GetName(typeof(Enums.SubtitleFormat), subFormat)</option>
+            }
+        </select>
+        <label>Convert subtitles to other format</label>
+    </div>
+</div>
+</div>
+</div>
+<div id="pane-justified-update" class="mui-tabs__pane">
+    <div class="mui-panel">
+        If you are experiencing issues downloading, trying updating the internal downloader
+        <div style="text-align: center">
+            <button class="mui-btn mui-btn--raised mui-btn--primary mui-btn--dark" id="update-btn" onclick="update();" type="submit">Update internal downloader</button>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+<script>
+    const UPDATE_TABLE = "update-table";
+
+    const DOWNLOAD = "download";
+
+    const DOWNLOAD_COMPLETE = "download-complete";
+
+    const DOWNLOAD_ERROR = "download-error";
+
+    const URL_PARSING_ERROR = "url-parsing-error";
+
+    const INVALID_OUTPUT_PATH = "invalid-output-path";
+
+    const SELECT_DIRECTORY = "select-directory";
+
+    const DIRECTORY_SELECTED = "directory-selected";
+
+    const UPDATE_OPTIONS = "update-options";
+
+    const LOAD_OPTIONS = "load-options";
+
+    const SET_YDL_PROPERTY = "set-ydl-property";
+
+    const SET_FILESYSTEM_OPTION = "setFilesystemOption";
+
+    const HEARTBEAT = "heartbeat";
+
+    const CONSOLE = "console";
+
+    const { ipcRenderer } = require("electron");
+
+    var options = {};
+
+    function updateOptions() {
+        ipcRenderer.send(UPDATE_OPTIONS, options);
+    }
+
+    function setDownloadOption(property, value) {
+        if (typeof options.DownloadOptions === "undefined") {
+            options.DownloadOptions = {};
+        }
+
+        options.DownloadOptions[property] = value;
+        updateOptions();
+    }
+
+    function setGeneralOption(property, value) {
+        if (typeof options.GeneralOptions === "undefined") {
+            options.GeneralOptions = {};
+        }
+
+        options.GeneralOptions[property] = value;
+        updateOptions();
+    }
+
+    function setAdobePassOption(property, value) {
+        if (typeof options.AdobePassOptions === "undefined") {
+            options.AdobePassOptions = {};
+        }
+
+        options.AdobePassOptions[property] = value;
+        updateOptions();
+    }
+
+    function setAuthenticationOption(property, value) {
+        if (typeof options.AuthenticationOptions === "undefined") {
+            options.AuthenticationOptions = {};
+        }
+
+        options.AuthenticationOptions[property] = value;
+        updateOptions();
+    }
+
+    function setFilesystemOption(property, value) {
+        if (typeof options.FilesystemOptions === "undefined") {
+            options.FilesystemOptions = {};
+        }
+
+        options.FilesystemOptions[property] = value;
+        updateOptions();
+    }
+
+    function setNetworkOption(property, value) {
+        if (typeof options.NetworkOptions === "undefined") {
+            options.NetworkOptions = {};
+        }
+
+        options.NetworkOptions[property] = value;
+        updateOptions();
+    }
+
+    function setPostProcessingOption(property, value) {
+        if (typeof options.PostProcessingOptions === "undefined") {
+            options.PostProcessingOptions = {};
+        }
+
+        options.PostProcessingOptions[property] = value;
+        updateOptions();
+    }
+
+    function setSubtitleOption(property, value) {
+        if (typeof options.SubtitleOptions === "undefined") {
+            options.SubtitleOptions = {};
+        }
+
+        options.SubtitleOptions[property] = value;
+        updateOptions();
+    }
+
+    function setThumbnailImagesOption(property, value) {
+        if (typeof options.ThumbnailImagesOptions === "undefined") {
+            options.ThumbnailImagesOptions = {};
+        }
+
+        options.ThumbnailImagesOptions[property] = value;
+        updateOptions();
+    }
+
+    function setVerbositySimulationOption(property, value) {
+        if (typeof options.VerbositySimulationOptions === "undefined") {
+            options.VerbositySimulationOptions = {};
+        }
+
+        options.VerbositySimulationOptions[property] = value;
+        updateOptions();
+    }
+
+    function setVideoFormatOption(property, value) {
+        if (typeof options.VideoFormatOptions === "undefined") {
+            options.VideoFormatOptions = {};
+        }
+
+        options.VideoFormatOptions[property] = value;
+        updateOptions();
+    }
+
+    function setVideoSelectionOption(property, value) {
+        if (typeof options.VideoSelectionOptions === "undefined") {
+            options.VideoSelectionOptions = {};
+        }
+
+        options.VideoSelectionOptions[property] = value;
+        updateOptions();
+    }
+
+    function setWorkaroundsOption(property, value) {
+        if (typeof options.WorkaroundsOptions === "undefined") {
+            options.WorkaroundsOptions = {};
+        }
+
+        options.WorkaroundsOptions[property] = value;
+        updateOptions();
+    }
+
+    var downloadBtn = document.getElementById('download-btn');
+    var urlTextArea = document.getElementById('url-textarea');
+    var downloadPathInput = document.getElementById('output');
+    var downloadsTable = document.getElementById('downloads-table');
+    var heartbeatTimer;
+    var heartbeatReceived = true;
+
+    function download() {
+        downloadBtn.innerHTML = "Preparing download...";
+        const downloadArgs = {};
+        downloadArgs.urls = urlTextArea.value.split("\n");
+        downloadArgs.options = options;
+        ipcRenderer.send(DOWNLOAD, downloadArgs);
+        downloadBtn.disabled = true;
+        urlTextArea.disabled = true;
+        downloadPathInput.disabled = true;
+    }
+
+    function update() {
+        downloadBtn.innerHTML = "Updating downloader...";
+        const downloadArgs = {};
+        const updateOptions = { GeneralOptions: { update: true } };
+        downloadArgs.options = updateOptions;
+        ipcRenderer.send(DOWNLOAD, downloadArgs);
+        downloadBtn.disabled = true;
+        urlTextArea.disabled = true;
+        downloadPathInput.disabled = true;
+    }
+
+    function downloadComplete() {
+        downloadBtn.disabled = false;
+        urlTextArea.disabled = false;
+        downloadPathInput.disabled = false;
+        downloadBtn.innerHTML = "Download";
+    }
+
+    function selectDirectory(elemId, fnName) {
+        const args = { id: elemId, functionName: fnName };
+        ipcRenderer.send(SELECT_DIRECTORY, args);
+        document.getElementById(elemId).blur();
+    }
+
+    function setYdlProperty(prop, val) {
+        const propValue = { property: prop, value: val };
+        ipcRenderer.send(SET_YDL_PROPERTY, propValue);
+    }
+
+    function heartbeat() {
+        if (heartbeatReceived) {
+            heartbeatReceived = false;
+        } else {
+            window.alert('Application error. Please restart.');
+            window.clearInterval(heartbeatTimer);
+        }
+    }
+
+    function openConsole() {
+        ipcRenderer.send(CONSOLE);
+    }
+
+    ipcRenderer.on(UPDATE_TABLE,
+        (event, tableString) => {
+            downloadBtn.innerHTML = "Downloading...";
+            downloadsTable.innerHTML = tableString;
+        });
+
+    ipcRenderer.on(DOWNLOAD_COMPLETE,
+        (event, arg) => {
+            downloadComplete();
+        });
+
+    ipcRenderer.on(URL_PARSING_ERROR,
+        (event, arg) => {
+            alert(`Invalid URL(s):\n${arg}`);
+            downloadComplete();
+        });
+
+    ipcRenderer.on(INVALID_OUTPUT_PATH,
+        (event, arg) => {
+            alert(`Invalid path:\n${arg}`);
+            downloadComplete();
+        });
+
+    ipcRenderer.on(DIRECTORY_SELECTED,
+        (event, arg) => {
+            var input = document.getElementById(arg.id);
+            input.value = arg.directory;
+            if (arg.directory.length > 0) {
+                input.className = "mui--is-dirty mui--is-touched mui--is-not-empty";
+            } else {
+                input.className = "mui--is-empty mui--is-untouched mui--is-pristine";
+            }
+
+            var fn = window[arg.functionName];
+            if (typeof fn === 'function') {
+                fn(arg.id, arg.directory);
+            }
+        });
+
+    ipcRenderer.on(LOAD_OPTIONS,
+        (event, arg) => {
+            options = JSON.parse(arg);
+        });
+
+    ipcRenderer.on(HEARTBEAT,
+        (event, arg) => {
+            heartbeatReceived = true;
+            window.clearInterval(heartbeatTimer);
+            heartbeatTimer = window.setInterval(heartbeat, 2000);
+        }
+    );
+</script>
+</body>
+</html>

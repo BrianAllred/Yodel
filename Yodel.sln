@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2010
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Yodel", "Yodel\Yodel.csproj", "{1CBA9685-6E55-4A8B-A2A4-0D32197BE4F3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C50B7BBA-1A24-41CE-8A37-B762590E2636}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1CBA9685-6E55-4A8B-A2A4-0D32197BE4F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1CBA9685-6E55-4A8B-A2A4-0D32197BE4F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1CBA9685-6E55-4A8B-A2A4-0D32197BE4F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1CBA9685-6E55-4A8B-A2A4-0D32197BE4F3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F8CC52F7-A8E6-4C42-9492-3E270F3D3DB6}
+	EndGlobalSection
+EndGlobal
