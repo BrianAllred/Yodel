@@ -1,0 +1,35 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: brianallred/yodel
+    steps:
+      - checkout
+      - run:
+          name: Restore package dependencies
+          command: |
+            dotnet restore
+      - run:
+          name: Build release
+          working_directory: Yodel
+          command: |
+            dotnet electronize build linux
+            dotnet electronize build win
+            dotnet electronize build osx
+      - run:
+          name: Rename files
+          working_directory: Yodel/bin/desktop
+          command: |
+            mv ElectronNET.Host-linux-x64/ElectronNET.Host ElectronNET.Host-linux-x64/Yodel
+            mv ElectronNET.Host-win32-x64/ElectronNET.Host.exe ElectronNET.Host-win32-x64/Yodel.exe
+            mv ElectronNET.Host-darwin-x64/ElectronNET.Host.app ElectronNET.Host-darwin-x64/Yodel.app
+            mkdir packages
+      - run:
+          name: Package release
+          working_directory: Yodel/bin/desktop/packages
+          command: |
+            tar -czf yodel-linux-x64.tar.gz -C ../ElectronNET.Host-linux-x64 .
+            tar -czf yodel-win-x64.tar.gz -C ../ElectronNET.Host-win32-x64 .
+            tar -czf yodel-osx-x64.tar.gz -C ../ElectronNET.Host-darwin-x64 .
+      - store_artifacts:
+          path: Yodel/bin/desktop/packages
